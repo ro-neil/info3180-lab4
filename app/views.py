@@ -10,6 +10,7 @@ from flask import render_template, request, redirect, url_for, flash, session, a
 from werkzeug.utils import secure_filename
 from .forms import UploadForm
 from .config import Config
+from flask.helpers import send_from_directory
 ###
 # Routing for your application.
 ###
@@ -44,7 +45,7 @@ def upload():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             flash('File Saved', 'success')
             return redirect(url_for('home'))
-        flash('Form did not validate!', 'danger')
+        flash('Invalid image format!', 'danger')
     return render_template('upload.html', form=form)
 
 
@@ -69,9 +70,29 @@ def logout():
     return redirect(url_for('home'))
 
 
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    root_dir = os.getcwd()
+    return send_from_directory(os.path.join(root_dir, app.config['UPLOAD_FOLDER']),filename)
+    
+
+
+@app.route('/files')
+def files():
+    return render_template('files.html', filenames=get_uploaded_images())
 ###
 # The functions below should be applicable to all Flask apps.
 ###
+
+def get_uploaded_images():
+    uploaded_images = []
+    rootdir = os.getcwd()
+    for subdir, dirs, files in os.walk(rootdir + '/uploads'):
+        for filename in files:
+            if filename != '.gitkeep':
+                uploaded_images.append(filename)
+    return uploaded_images
+
 
 # Flash errors from the form if validation fails
 def flash_errors(form):
