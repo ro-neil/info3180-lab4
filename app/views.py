@@ -74,7 +74,6 @@ def logout():
 def get_image(filename):
     root_dir = os.getcwd()
     return send_from_directory(os.path.join(root_dir, app.config['UPLOAD_FOLDER']),filename)
-    
 
 
 @app.route('/files')
